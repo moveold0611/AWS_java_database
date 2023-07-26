@@ -1,6 +1,9 @@
 package main;
 
 import java.awt.EventQueue;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -27,6 +31,32 @@ public class RegistrationUser extends JFrame {
 	private JTextField usernameTextField;
 	private JTextField passwordTextField;
 	private JTable table;
+	
+	private boolean insertUser (String username, String password) {
+		DBConnectionMgr pool = DBConnectionMgr.getInstance();		
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		boolean result = false;
+		
+		try {
+			con = pool.getConnection();
+			String sql = "insert into user_tb values(0, ?, ?)";
+			pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, username);
+			pstmt.setString(2, password);
+			result = pstmt.executeUpdate() != 0;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			pool.freeConnection(con, pstmt);
+		}
+		return result;			
+	}
+	
+	private void updateUserListTable(JTable a) {
+		a.setModel(getUserTableModel());
+	}
+	
 	
 	public DefaultTableModel getUserTableModel() {
 		String[] header = new String[] {"user_id", "username", "password"};
@@ -118,7 +148,17 @@ public class RegistrationUser extends JFrame {
 		contentPane.add(lblNewLabel_1);
 		
 		JButton addUserButton = new JButton("추가");
-		addUserButton.setBounds(12, 70, 410, 23);
+		addUserButton.setBounds(12, 70, 410, 23);		
+		addUserButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(!insertUser(usernameTextField.getText(), passwordTextField.getText())) { // boolean을 리턴하는 메소드
+					JOptionPane.showMessageDialog(contentPane, "사용자 추가 실패", "insert 오류", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				updateUserListTable(table);
+			}
+		});
 		contentPane.add(addUserButton);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -127,6 +167,7 @@ public class RegistrationUser extends JFrame {
 		
 		table = new JTable();
 		table.setModel(getUserTableModel());
+				
 		
 //		new DefaultTableModel(
 //				new Object[][] {
