@@ -1,5 +1,8 @@
 package service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import entity.Product;
 import repository.ProductRepository;
 
@@ -20,15 +23,27 @@ public class ProductService {
 	
 		
 	public boolean isProductDeplicated(String productName) {
-		boolean result = false;
-		result = productRepository.findProductByProduct(productName) != null;
-		return result;
+		return productRepository.findProductByProduct(productName) != null;
 	}
 	
 	public boolean registerProduct(Product product) {
-		boolean result;
-		result = productRepository.saveProduct(product) > 0;
-		return result;
+		return productRepository.saveProduct(product) > 0;
+	}
+	
+	public List<Product> searchProduct(String searchOption, String searchValue) {
+		return productRepository.getSearchProductList(searchOption, searchValue);
+	}
+	
+	public boolean removeProduct(int productId) {
+		return productRepository.deleteProduct(productId) > 0;
+	}
+	
+	public Product getProductByProductId(int productId) {
+		return productRepository.findProductByProductId(productId);
+	}
+	
+	public boolean modifyProduct(Product product) {
+		return productRepository.updateProduct(product) > 0;
 	}
 	
 }
